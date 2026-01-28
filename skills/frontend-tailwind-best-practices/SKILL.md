@@ -5,7 +5,7 @@ description: Tailwind CSS patterns and conventions for frontend apps. Use when w
 
 # Tailwind CSS Best Practices
 
-Styling patterns and conventions for frontend applications. Contains 8 rules covering layout utilities, affordances, color schemes, responsive design, and className handling.
+Styling patterns and conventions for frontend applications. Contains 9 rules covering layout utilities, affordances, color schemes, responsive design, and className handling.
 
 ## When to Apply
 
@@ -45,6 +45,24 @@ Available utilities:
 - `center` - Center content both horizontally and vertically
 - `spacer` - Flexible spacer that fills available space
 - `circle` - Perfect circle with aspect-ratio 1/1
+
+#### layout-prefer-gaps - @rules/layout-prefer-gaps.md
+
+Use `gap-*` on parents instead of child margins.
+
+```tsx
+// Bad
+<div>
+  <Item className="mb-4" />
+  <Item className="mb-4" />
+</div>
+
+// Good
+<div className="flex flex-col gap-4">
+  <Item />
+  <Item />
+</div>
+```
 
 #### layout-responsive-stacks - @rules/layout-responsive-stacks.md
 

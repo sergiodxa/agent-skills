@@ -687,6 +687,16 @@ import { Link } from "react-router";
 </LinkButton>
 ```
 
+#### navigation-avoid-navigate-back - @rules/navigation-avoid-navigate-back.md
+
+Avoid `navigate(-1)` for in-app back links.
+
+```tsx
+<Link to={`/items/${id}`} state={{ back: location.pathname }}>
+  View
+</Link>
+```
+
 #### prefetch-fetcher-data - @rules/prefetch-fetcher-data.md
 
 Use PrefetchPageLinks to preload data for fetcher.load() calls.

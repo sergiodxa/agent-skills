@@ -471,6 +471,17 @@ Prefer children for composition. Use render props only when passing data back.
 <List renderItem={({ item }) => <Item {...item} />} />
 ```
 
+#### composition-avoid-overabstraction - @rules/composition-avoid-overabstraction.md
+
+Avoid rigid configuration props; prefer composable children APIs.
+
+```tsx
+<Select value="abc" onChange={...}>
+  <Option value="abc">ABC</Option>
+  <Option value="xyz">XYZ</Option>
+</Select>
+```
+
 #### composition-typescript-namespaces - @rules/composition-typescript-namespaces.md
 
 Use TypeScript namespaces to combine component and its types for single-import access.

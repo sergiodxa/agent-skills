@@ -8,4 +8,4 @@ Install with:
 bunx skills add sergiodxa/agent-skills
 ```
 
-And choose the ones you one.
+And choose the ones you want.

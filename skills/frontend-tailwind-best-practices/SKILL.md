@@ -5,7 +5,7 @@ description: Tailwind CSS patterns and conventions for frontend apps. Use when w
 
 # Tailwind CSS Best Practices
 
-Styling patterns and conventions for frontend applications. Contains 9 rules covering layout utilities, affordances, color schemes, responsive design, and className handling.
+Styling patterns and conventions for frontend applications. Contains 10 rules covering layout utilities, affordances, color schemes, responsive design, and className handling.
 
 ## When to Apply
 
@@ -174,6 +174,16 @@ Scale text responsively.
 
 // Responsive line height with text
 <p className="text-sm leading-5 md:text-base md:leading-6">
+```
+
+#### responsive-capabilities - @rules/responsive-capabilities.md
+
+Design for input capabilities (pointer/hover) instead of device labels.
+
+```tsx
+<button className="h-10 w-10 pointer-coarse:h-12 pointer-coarse:w-12">
+  <Icon />
+</button>
 ```
 
 ## Anti-Patterns

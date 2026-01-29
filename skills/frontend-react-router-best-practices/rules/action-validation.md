@@ -6,82 +6,77 @@ tags: [action, validation, zod, forms]
 
 # Form Data Validation
 
-Validate form data with zod schemas in actions, using i18n for error messages.
+Validate form data with Standard Schema in actions, using a shared `validate` helper.
 
 ## Why
 
 - Type-safe validation with automatic parsing
-- User-friendly localized error messages
+- Consistent result handling across actions
 - Consistent error handling pattern
 - Catches invalid data before mutations
 
 ## Pattern
 
-```tsx
-import { data } from "react-router";
-import { z } from "zod";
-import { i18n } from "~/lib/i18n.server";
+```ts
+import type { StandardSchemaV1 } from "@standard-schema/spec";
+import { failure, success } from "~/lib/result";
+
+export async function validate<Schema extends StandardSchemaV1>(
+  input: FormData | Request,
+  schema: Schema,
+): Promise<
+  ReturnType<typeof success<StandardSchemaV1.InferOutput<Schema>>> |
+    ReturnType<typeof failure<ValidationError>>
+> {
+  if (input instanceof Request) input = await input.formData();
+  let entries = Object.fromEntries(input.entries());
+  let result = schema["~standard"].validate(entries);
+  if (result instanceof Promise) result = await result;
+  if (result.issues) return failure(new ValidationError(result.issues));
+  return success(result.value);
+}
+
+export class ValidationError extends Error {
+  issues: StandardSchemaV1.ValidationIssue[];
+
+  constructor(issues: StandardSchemaV1.ValidationIssue[]) {
+    super("Validation Error");
+    this.issues = issues;
+  }
+}
+```
+
+```ts
+import { data, redirect } from "react-router";
+import { isFailure } from "~/lib/result";
+import { validate } from "~/lib/validation";
+import { currentUser } from "~/lib/authorize.server";
 
 export async function action({ request }: Route.ActionArgs) {
-  let client = await authenticate(request);
-  await authorize(client, { accountStatus: "active" });
+  let user = currentUser();
 
-  let t = await i18n.getFixedT(request);
-  let formData = await request.formData();
-
-  try {
-    const { amount, description } = z
-      .object({
-        amount: z.coerce.number().min(10, t("Amount must be at least $10")),
-        description: z
-          .string()
-          .min(1, t("Description is required"))
-          .max(500, t("Description must be under 500 characters")),
-      })
-      .parse({
-        amount: formData.get("amount"),
-        description: formData.get("description"),
-      });
-
-    await createRecord(client, { amount, description });
-    throw redirect("/success");
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return data(
-        { errors: error.issues.map(({ message }) => message) },
-        { status: 400 },
-      );
-    }
-    throw error;
+  let result = await validate(request, schema);
+  if (isFailure(result)) {
+    return data(result.error.issues, { status: 422 });
   }
+
+  await createRecord({ userId: user.id, ...result.data });
+  throw redirect("/success");
 }
 ```
 
 ## Common Validators
 
-```tsx
+```ts
 const schema = z.object({
-  // String fields
-  name: z.string().min(1, t("Name is required")),
-  email: z.string().email(t("Invalid email address")),
-
-  // Numbers (from form data, need coerce)
-  amount: z.coerce.number().positive(t("Amount must be positive")),
+  name: z.string().min(1),
+  email: z.string().email(),
+  amount: z.coerce.number().positive(),
   quantity: z.coerce.number().int().min(1).max(100),
-
-  // Optional with default
   page: z.coerce.number().default(1),
-
-  // Enums
   status: z.enum(["draft", "published", "archived"]),
-
-  // Boolean (checkboxes)
-  agreed: z.coerce.boolean().refine((v) => v, t("You must agree")),
-
-  // Arrays (multiple select/checkboxes)
-  tags: z.array(z.string()).min(1, t("Select at least one tag")),
-
-  // Nullable
+  agreed: z.coerce.boolean(),
+  tags: z.array(z.string()).min(1),
   notes: z.string().nullable(),
 });
 ```

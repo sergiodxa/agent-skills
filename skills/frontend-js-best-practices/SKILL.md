@@ -5,7 +5,7 @@ description: JavaScript performance optimization guidelines. Use when writing, r
 
 # JavaScript Best Practices
 
-Performance optimization and code style patterns for JavaScript and TypeScript code. Contains 16 rules focused on reducing unnecessary computation, optimizing data structures, and maintaining consistent conventions.
+Performance optimization and code style patterns for JavaScript and TypeScript code. Contains 17 rules focused on reducing unnecessary computation, optimizing data structures, and maintaining consistent conventions.
 
 ## When to Apply
 
@@ -313,4 +313,13 @@ element.style.height = "200px";
 element.style.width = "100px";
 element.style.height = "200px";
 const { width, height } = element.getBoundingClientRect();
+```
+
+### result-type (MEDIUM) — @rules/result-type.md
+
+Use an explicit `Result` type for success/failure.
+
+```typescript
+let result = success(data);
+if (isFailure(result)) return handleError(result.error);
 ```

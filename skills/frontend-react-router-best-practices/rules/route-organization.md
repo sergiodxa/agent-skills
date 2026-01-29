@@ -93,14 +93,15 @@ import { data } from "react-router";
 import { queryItem, queryToolbar } from "./queries.server";
 import { Toolbar } from "./components/toolbar";
 import { ImageGallery } from "./components/image-gallery";
+import { currentUser } from "~/lib/authorize.server";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
-  let client = await authenticate(request);
+  let user = currentUser();
   let itemId = z.string().parse(params.itemId);
 
   let [item, toolbar] = await Promise.all([
-    queryItem(client, itemId),
-    queryToolbar(client, itemId),
+    queryItem(user.id, itemId),
+    queryToolbar(user.id, itemId),
   ]);
 
   return data({ item, toolbar });
@@ -165,8 +166,8 @@ export function actionSchema(t: TFunction) {
 ### queries.server.ts
 
 ```tsx
-export async function queryItem(client: ApiClient, itemId: string) {
-  let item = await client.items.show(itemId);
+export async function queryItem(userId: string, itemId: string) {
+  let item = await fetchItem(userId, itemId);
   return {
     id: item.id,
     title: item.title,
@@ -184,10 +185,11 @@ import {
   actionSchema,
 } from "./schemas.server";
 import { queryItem } from "./queries.server";
-import i18n from "~/lib/i18n.server";
+import { getInstance } from "~/middleware/i18next";
+import { currentUser } from "~/lib/authorize.server";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
-  let client = await authenticate(request);
+  let user = currentUser();
   let { itemId } = paramsSchema.parse(params);
 
   let url = new URL(request.url);
@@ -195,13 +197,13 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     Object.fromEntries(url.searchParams),
   );
 
-  let item = await queryItem(client, itemId);
+  let item = await queryItem(user, itemId);
   return data({ item, page, sort });
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
-  let client = await authenticate(request);
-  let t = await i18n.getFixedT(request);
+  let user = currentUser();
+  let t = getInstance(context).t;
   let { itemId } = paramsSchema.parse(params);
   let formData = await request.formData();
 
@@ -209,12 +211,12 @@ export async function action({ request, params }: Route.ActionArgs) {
   let body = actionSchema(t).parse(Object.fromEntries(formData.entries()));
 
   if (body.intent === "update") {
-    await updateItem(client, itemId, body);
+    await updateItem(user, itemId, body);
     throw redirect(`/items/${itemId}`);
   }
 
   if (body.intent === "delete") {
-    await deleteItem(client, itemId);
+    await deleteItem(user, itemId);
     throw redirect("/items");
   }
 }

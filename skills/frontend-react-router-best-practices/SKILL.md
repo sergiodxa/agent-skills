@@ -5,7 +5,7 @@ description: React Router performance and architecture patterns. Use when writin
 
 # React Router Best Practices
 
-Performance optimization and architecture patterns for React Router applications. Contains 37 rules across 9 categories focused on data loading, actions, forms, streaming, and route organization.
+Performance optimization and architecture patterns for React Router applications. Contains 55 rules across 11 categories focused on data loading, actions, forms, streaming, and route organization.
 
 ## When to Apply
 
@@ -175,6 +175,114 @@ export async function loader({ context }: Route.LoaderArgs) {
   authorize(context, { requireUser: true, onboardingComplete: true });
   return null;
 }
+```
+
+### Middleware & Security (HIGH)
+
+#### middleware-session - @rules/middleware-session.md
+
+Keep a single session instance per request.
+
+```ts
+export const middleware: Route.MiddlewareFunction[] = [sessionMiddleware];
+```
+
+#### middleware-context-storage - @rules/middleware-context-storage.md
+
+Store context/request in AsyncLocalStorage for arg-less helpers.
+
+```ts
+export const middleware: Route.MiddlewareFunction[] = [contextStorageMiddleware];
+```
+
+#### middleware-batcher - @rules/middleware-batcher.md
+
+Deduplicate request-scoped API/DB calls.
+
+```ts
+let result = await getBatcher().batch("key", () => getData());
+```
+
+#### middleware-request-id - @rules/middleware-request-id.md
+
+Add request IDs for logging/correlation.
+
+```ts
+let requestId = getRequestID();
+```
+
+#### middleware-logger - @rules/middleware-logger.md
+
+Log requests consistently with built-in middleware.
+
+```ts
+export const middleware: Route.MiddlewareFunction[] = [loggerMiddleware];
+```
+
+#### middleware-server-timing - @rules/middleware-server-timing.md
+
+Add Server-Timing measurements to responses.
+
+```ts
+return getTimingCollector().measure("load", "Load data", () => getData());
+```
+
+#### middleware-singleton - @rules/middleware-singleton.md
+
+Create per-request singletons for caches.
+
+```ts
+let cache = getSingleton(context);
+```
+
+#### sec-fetch-guards - @rules/sec-fetch-guards.md
+
+Reject cross-site mutation requests via Sec-Fetch headers.
+
+```ts
+if (fetchSite(request) === "cross-site") throw new Response(null, { status: 403 });
+```
+
+#### form-honeypot - @rules/form-honeypot.md
+
+Add honeypot inputs for public forms.
+
+```tsx
+<Form method="post">
+  <HoneypotInputs />
+</Form>
+```
+
+#### cors-headers - @rules/cors-headers.md
+
+Apply CORS headers to API routes.
+
+```ts
+return await cors(request, data(await getData()));
+```
+
+#### safe-redirects - @rules/safe-redirects.md
+
+Sanitize user-driven redirects.
+
+```ts
+return redirect(safeRedirect(redirectTo, "/"));
+```
+
+#### typed-cookies - @rules/typed-cookies.md
+
+Validate cookie payloads with schemas.
+
+```ts
+let typed = createTypedCookie({ cookie, schema });
+```
+
+#### client-ip-address - @rules/client-ip-address.md
+
+Extract client IP from trusted proxy headers.
+
+```ts
+let ip = getClientIPAddress(request);
 ```
 
 #### data-parent-route-data - @rules/data-parent-route-data.md
@@ -717,6 +825,34 @@ function ItemDetails({ itemId }: { itemId: string }) {
     </>
   );
 }
+```
+
+### Resource Routes & Responses (MEDIUM)
+
+#### response-helpers - @rules/response-helpers.md
+
+Use response helpers for resource routes.
+
+```ts
+return html("<h1>Hello</h1>");
+```
+
+#### sse-event-stream - @rules/sse-event-stream.md
+
+Stream updates with `eventStream` and `useEventSource`.
+
+```ts
+return eventStream(request.signal, (send) => {
+  send({ event: "time", data: new Date().toISOString() });
+});
+```
+
+#### prefetch-cache - @rules/prefetch-cache.md
+
+Use short caching for prefetch requests.
+
+```ts
+if (isPrefetch(request)) headers.set("Cache-Control", "private, max-age=5");
 ```
 
 ### Route Organization (MEDIUM)

@@ -5,7 +5,7 @@ description: JavaScript performance optimization guidelines. Use when writing, r
 
 # JavaScript Best Practices
 
-Performance optimization and code style patterns for JavaScript and TypeScript code. Contains 18 rules focused on reducing unnecessary computation, optimizing data structures, and maintaining consistent conventions.
+Performance optimization and code style patterns for JavaScript and TypeScript code. Contains 16 rules focused on reducing unnecessary computation, optimizing data structures, and maintaining consistent conventions.
 
 ## When to Apply
 

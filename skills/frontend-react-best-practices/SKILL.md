@@ -304,6 +304,25 @@ Suppress expected hydration mismatches.
 <span suppressHydrationWarning>{new Date().toLocaleString()}</span>
 ```
 
+#### rendering-client-only - @rules/rendering-client-only.md
+
+Render browser-only components with ClientOnly and a fallback.
+
+```tsx
+<ClientOnly fallback={<Skeleton />}>
+  {() => <Map />}
+</ClientOnly>
+```
+
+#### rendering-use-hydrated - @rules/rendering-use-hydrated.md
+
+Use `useHydrated` for SSR/CSR divergence.
+
+```tsx
+let hydrated = useHydrated();
+return hydrated ? <Widget /> : <Skeleton />;
+```
+
 #### rendering-usetransition-loading - @rules/rendering-usetransition-loading.md
 
 Prefer useTransition over manual loading states.

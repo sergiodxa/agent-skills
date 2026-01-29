@@ -5,7 +5,7 @@ description: React performance optimization guidelines. Use when writing, review
 
 # React Best Practices
 
-Performance optimization and composition patterns for React components. Contains 32 rules across 6 categories focused on reducing re-renders, optimizing bundles, component composition, and avoiding common React pitfalls.
+Performance optimization and composition patterns for React components. Contains 33 rules across 6 categories focused on reducing re-renders, optimizing bundles, component composition, and avoiding common React pitfalls.
 
 ## When to Apply
 
@@ -336,6 +336,16 @@ let handleSearch = (value) => {
     setResults(data);
   });
 };
+```
+
+#### fault-tolerant-error-boundaries - @rules/fault-tolerant-error-boundaries.md
+
+Place error boundaries at feature boundaries.
+
+```tsx
+<ErrorBoundary fallback={<SidebarError />}>
+  <Sidebar />
+</ErrorBoundary>
 ```
 
 ### Client Patterns (MEDIUM)
